@@ -32,7 +32,7 @@ int citanje(pozicija head, char datoteka[]) {
 
         novi->koef = buffer[0] - '0';
         novi->vrijednost = buffer[1] - '0';
-
+         
         novi->next = head->next;
         head->next = novi;
     }
@@ -42,14 +42,15 @@ int citanje(pozicija head, char datoteka[]) {
 }
 
 void sortiranje(pozicija head) {
-    pozicija p, q;
+    pozicija p, q, tempPozicija;
     int temp;
+
 
     for (p = head->next; p != NULL; p = p->next) {
 
         for (q = p->next; q != NULL; q = q->next) {
 
-            if (p->vrijednost > q->vrijednost) {
+            if (p->vrijednost < q->vrijednost) {
 
                 temp = p->vrijednost;
                 p->vrijednost = q->vrijednost;
@@ -61,8 +62,28 @@ void sortiranje(pozicija head) {
             }
         }
     }
-}
 
+
+    p = head->next;
+
+    while (p != NULL && p->next != NULL) {
+
+        if (p->vrijednost == p->next->vrijednost) {
+
+            tempPozicija = p->next;
+
+            p->koef += tempPozicija->koef;
+
+            p->next = tempPozicija->next;
+
+            free(tempPozicija);
+        }
+        else {
+            p = p->next;
+        }
+    }
+
+}
 void dodaj(pozicija head, int koef, int eksponent) {
 
     pozicija novi = (pozicija)malloc(sizeof(polinom));
@@ -192,7 +213,11 @@ int main() {
     citanje(&drugi, dat2);
 
     sortiranje(&prvi);
+    ispis(&prvi);
+
     sortiranje(&drugi);
+    ispis(&drugi);
+
 
     zbrajanje(&prvi, &drugi, &rezultat);
 
