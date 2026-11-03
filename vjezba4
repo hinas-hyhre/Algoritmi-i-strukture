@@ -1,0 +1,230 @@
+
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Polinom* pozicija;
+void sortiranje(pozicija);
+void ispis(pozicija);
+
+typedef struct Polinom {
+    int vrijednost; 
+    int koef;      
+    pozicija next;
+} polinom;
+
+
+int citanje(pozicija head, char datoteka[]) {
+    FILE* fp;
+    char buffer[20];
+
+    fp = fopen(datoteka, "r");
+
+    if (fp == NULL) {
+        printf("Greska pri otvaranju datoteke!\n");
+        return -1;
+    }
+
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+
+        pozicija novi = (pozicija)malloc(sizeof(polinom));
+
+
+        novi->koef = buffer[0] - '0';
+        novi->vrijednost = buffer[1] - '0';
+
+        novi->next = head->next;
+        head->next = novi;
+    }
+
+    fclose(fp);
+    return 0;
+}
+
+void sortiranje(pozicija head) {
+    pozicija p, q;
+    int temp;
+
+    for (p = head->next; p != NULL; p = p->next) {
+
+        for (q = p->next; q != NULL; q = q->next) {
+
+            if (p->vrijednost > q->vrijednost) {
+
+                temp = p->vrijednost;
+                p->vrijednost = q->vrijednost;
+                q->vrijednost = temp;
+
+                temp = p->koef;
+                p->koef = q->koef;
+                q->koef = temp;
+            }
+        }
+    }
+}
+
+void dodaj(pozicija head, int koef, int eksponent) {
+
+    pozicija novi = (pozicija)malloc(sizeof(polinom));
+
+    novi->koef = koef;
+    novi->vrijednost = eksponent;
+    novi->next = NULL;
+
+    while (head->next != NULL) {
+        head = head->next;
+    }
+
+    head->next = novi;
+}
+
+
+void mnozenje(pozicija prvi, pozicija drugi, pozicija rezultat) {
+
+    pozicija clanPrvog = prvi->next;
+
+    while (clanPrvog != NULL) {
+
+        pozicija clanDrugog = drugi->next;
+
+        while (clanDrugog != NULL) {
+
+            int noviKoef = clanPrvog->koef * clanDrugog->koef;
+
+            int noviEksponent = clanPrvog->vrijednost +
+                clanDrugog->vrijednost;
+
+            
+            pozicija trenutni = rezultat->next;
+
+            while (trenutni != NULL &&
+                trenutni->vrijednost != noviEksponent) {
+
+                trenutni = trenutni->next;
+            }
+
+            if (trenutni != NULL) {
+
+                trenutni->koef += noviKoef;
+
+            }
+            else {
+
+                dodaj(rezultat, noviKoef, noviEksponent);
+            }
+
+            clanDrugog = clanDrugog->next;
+        }
+
+        clanPrvog = clanPrvog->next;
+    }
+}
+
+
+
+void zbrajanje(pozicija prvi, pozicija drugi, pozicija rezultat) {
+
+    pozicija clanPrvog = prvi->next;
+    pozicija clanDrugog = drugi->next;
+
+    while (clanPrvog != NULL && clanDrugog != NULL) {
+
+        if (clanPrvog->vrijednost == clanDrugog->vrijednost) {
+
+            dodaj(rezultat,
+                clanPrvog->koef + clanDrugog->koef,
+                clanPrvog->vrijednost);
+
+            clanPrvog = clanPrvog->next;
+            clanDrugog = clanDrugog->next;
+        }
+
+        else if (clanPrvog->vrijednost < clanDrugog->vrijednost) {
+
+            dodaj(rezultat,
+                clanPrvog->koef,
+                clanPrvog->vrijednost);
+
+            clanPrvog = clanPrvog->next;
+        }
+
+        else {
+
+            dodaj(rezultat,
+                clanDrugog->koef,
+                clanDrugog->vrijednost);
+
+            clanDrugog = clanDrugog->next;
+        }
+    }
+
+    while (clanPrvog != NULL) {
+
+        dodaj(rezultat,
+            clanPrvog->koef,
+            clanPrvog->vrijednost);
+
+        clanPrvog = clanPrvog->next;
+    }
+
+    while (clanDrugog != NULL) {
+
+        dodaj(rezultat,
+            clanDrugog->koef,
+            clanDrugog->vrijednost);
+
+        clanDrugog = clanDrugog->next;
+    }
+}
+
+
+
+
+int main() {
+
+    char dat1[20] = "datoteka1.txt", dat2[20] = "datoteka2.txt";
+    polinom umnozak = { 0 };
+    polinom prvi = { 0 };
+    polinom drugi = { 0 };
+    polinom rezultat = { 0 };
+
+    citanje(&prvi, dat1);
+    citanje(&drugi, dat2);
+
+    sortiranje(&prvi);
+    sortiranje(&drugi);
+
+    zbrajanje(&prvi, &drugi, &rezultat);
+
+    printf("Prvi polinom: ");
+    ispis(&prvi);
+
+    printf("Drugi polinom: ");
+    ispis(&drugi);
+
+    printf("Zbroj: ");
+    ispis(&rezultat);
+
+    mnozenje(&prvi, &drugi, &umnozak);
+
+    sortiranje(&umnozak);
+
+    printf("Umnozak polinoma: ");
+    ispis(&umnozak);
+
+    return 0;
+}
+
+
+
+void ispis(pozicija head) {
+    pozicija temp = head->next;
+
+    while (temp != NULL) {
+        printf("%dx^%d ", temp->koef, temp->vrijednost);
+        temp = temp->next;
+    }
+
+    printf("\n");
+}
+
