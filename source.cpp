@@ -11,7 +11,7 @@ int unos_na_pocetak(pozicija);
 void ispis(pozicija);
 int dodaj_na_kraj(pozicija);
 pozicija pronadji(pozicija, char[]);
-void brisi(pozicija, char);
+void brisi(pozicija, char[]);
 int dodaj_iza_odredjenog(pozicija, char[]);
 int dodaj_ispred_odredjenog(pozicija, char[]);
 void sortiraj(pozicija);
